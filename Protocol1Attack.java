@@ -1,20 +1,34 @@
-public class Protocol1Client {
-	
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
+import java.net.Socket;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
+public class Protocol1Attack {
+
 	static int portNo = 11337;
 
 	public static void main(String[] args) {
 		try {
 			InetAddress host = InetAddress.getLocalHost();
-			Socket socket = new Socket(host,portNo);
-			Thread instance = new Thread(new ProtocolInstance(socket));
+			Socket socket = new Socket(host, portNo);
+			Thread instance = new Thread(new Protocol1AttackInstance(socket));
 			instance.start();
 		} catch (Exception e) {
-			System.out.println("Client error " + e)
+			System.out.println("Client error " + e);
 		}
 	}
 }
 
-private static class ProtocolInstance implements Runnable {
+class Protocol1AttackInstance implements Runnable {
 
 	Socket myConnection;
 	boolean debug = true;
@@ -22,9 +36,8 @@ private static class ProtocolInstance implements Runnable {
 	static Cipher encAEScipher;
 	String hexKey;
 
-	public ProtocolInstance(Socket myConnection) {
+	public Protocol1AttackInstance(Socket myConnection) {
 		this.myConnection = myConnection;
-	
 
 	}
 
@@ -33,62 +46,68 @@ private static class ProtocolInstance implements Runnable {
 		InputStream inStream;
 
 		try {
-			outSteam = myConnection.getOutputStream();
-			inStream = myConnection.getInputSteam();
+			outStream = myConnection.getOutputStream();
+			inStream = myConnection.getInputStream();
 
-			//Protocol Step 1
-			//Send "Connect Protocol 1"
+			// Protocol Step 1
+			// Send "Connect Protocol 1"
 			byte[] message1 = "Connect Protocol 1".getBytes();
 			outStream.write(message1);
-			if (debug) System.out.println("Sent message");
+			if (debug)
+				System.out.println("Sent message");
 
-		
-			//Protocol Step 2
-			//receive Nonce
+			// Protocol Step 2
+			// receive Nonce
 			byte[] serverNonce = new byte[32];
 			inStream.read(serverNonce);
-			if (debug) System.out.println("recieved nonce" + byteArrayToHexString(serverNonce));
+			if (debug)
+				System.out.println("recieved nonce" + byteArrayToHexString(serverNonce));
 
-			//Protocol Step 3
-			//send Nonce
+			// Protocol Step 3
+			// send Nonce
 			outStream.write(serverNonce);
-			if (debug) System.out.println("sent nonce" + byteArrayToHexString(serverNonce));
-			
-			//get Encryption from Server
+			if (debug)
+				System.out.println("sent nonce" + byteArrayToHexString(serverNonce));
+
+			// get Encryption from Server
 			byte[] sesskeyBytes = new byte[16];
-			SecretKeySpec secretKeySpec = new SecretKeySpec(sessKeyBytes, "AES");
- 
+			SecretKeySpec secretKeySpec = new SecretKeySpec(sesskeyBytes, "AES");
+
 			Cipher decAEScipherSession = Cipher.getInstance("AES");
 			decAEScipherSession.init(Cipher.DECRYPT_MODE, secretKeySpec);
 
 			Cipher encAEScipherSession = Cipher.getInstance("AES");
 			encAEScipherSession.init(Cipher.ENCRYPT_MODE, secretKeySpec);
-			
- 			if (debug) System.out.println("Session key :" + byteArrayToHexString(keyBytes));
-				//step 4
-				byte[] sessionKey = new byte[48];
-				inStream.read(sessionKey);
-				//step 5
-				outStream.write(sessionKey);
 
-				byte[] message = new byte[inStream.available()];
-				//step 6
-				instream.read(message);
+			if (debug)
+				System.out.println("Session key :" + byteArrayToHexString(sesskeyBytes));
+			// step 4
+			byte[] sessionKey = new byte[48];
+			inStream.read(sessionKey);
+			// step 5
+			outStream.write(sessionKey);
 
-				byte[] decryptedMessage = decAEScipherSession.doFinal(message);
+			byte[] message = new byte[inStream.available()];
+			// step 6
+			inStream.read(message);
+
+			byte[] decryptedMessage = decAEScipherSession.doFinal(message);
 
 		} catch (IOException e) {
-			
-		} catch (InvalidKeyEncryption) {
-		
-		} catch () {
 
-		} catch () {
-
-		} catch () {
-
-		} catch () {
-
+		} catch (InvalidKeyException e) {
+			e.printStackTrace();
+		} catch (NoSuchPaddingException e) {
+			e.printStackTrace();
+		} catch (IllegalBlockSizeException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (BadPaddingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 	}
 
@@ -125,10 +144,3 @@ private static class ProtocolInstance implements Runnable {
 
 }
 
-
-
-		}
-
-		
-	}
-}
