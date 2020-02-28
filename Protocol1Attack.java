@@ -128,19 +128,6 @@ class Protocol1AttackInstance implements Runnable {
 
 		return buf.toString();
 	} 
-
-	private static byte[] xorBytes (byte[] one, byte[] two) {
-	if (one.length!=two.length) {
-	    return null;
-	} else {
-	    byte[] result = new byte[one.length];
-	    for(int i=0;i<one.length;i++) {
-		result[i] = (byte) (one[i]^two[i]);
-	    }
-	    return result;
-	}
-    }
 	
-
 }
 
