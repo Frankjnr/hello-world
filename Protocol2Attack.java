@@ -127,14 +127,14 @@ public class Protocol2Attack {
                 byte [] encryptedServer  = attacker.getClientEncKey();
 				byte[]  encryptedServerNonce= encAESsessionCipher.doFinal(encryptedServer);
                 outStream.write(encryptedServerNonce);
-                if (debug) System.out.println("8 i recieved this from client 2"+encryptedServer);
-                if (debug) System.out.println("9 i sent this to the server"+encryptedServerNonce);
+                if (debug) System.out.println("(8) i recieved this from client 2"+encryptedServer);
+                if (debug) System.out.println("(9) i sent this to the server"+encryptedServerNonce);
                 
                  //recieve key
 				byte [] finaltoken= new byte[inStream.available()];
 				inStream.read(finaltoken);
 				byte[]  finaltokendec =decAESsessionCipher.doFinal(finaltoken);
-				if (debug) System.out.println("10 final step"+new String(finaltokendec));
+				if (debug) System.out.println("(10) final step" + new String(finaltokendec));
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -243,13 +243,13 @@ public class Protocol2Attack {
                 calculateSessionKey(y, gToTheX);
 
                 if (debug)
-                    System.out.println("4 i got this from client 1" + serverNonce);
+                    System.out.println("(4) i got this from client 1" + serverNonce);
 
                 // send the encrypted nonce to the server (protocol 3)
                 byte[] encryptedClientNonce = encAESsessionCipher.doFinal(serverNonce);
                 outStream.write(encryptedClientNonce);
                 if (debug)
-                    System.out.println("5 i sent this to get key encrytion " + encryptedClientNonce);
+                    System.out.println("(5) i sent this to get key encrytion " + encryptedClientNonce);
 
                 // Protocol Step 4
                 byte[] message5ct = new byte[32];
@@ -258,9 +258,9 @@ public class Protocol2Attack {
                 clientNonceKey = new byte[16];
                 System.arraycopy(deccryptedServerNonce, 0, clientNonceKey, 0, 16);
                 if (debug)
-                    System.out.println("6 i client2 got this from server " + deccryptedServerNonce);
+                    System.out.println("(6) i client2 got this from server " + deccryptedServerNonce);
                 if (debug)
-                    System.out.println("7 this is what i will send to the client1" + clientNonceKey);
+                    System.out.println("(7) this is what i will send to the client1" + clientNonceKey);
                 socket.close();
 
             } catch (IOException e) {
